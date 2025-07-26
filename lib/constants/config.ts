@@ -5,14 +5,14 @@ import { CATEGORIES } from "./categories";
 // =============================================================================
 
 export const SITE_CONFIG = {
-  title: "findly.tools",
+  title: "seriouslyanotherai.com",
   description: "The best tools, all in one place.",
   tagline: "Find the best tools for you.",
-  url: "https://findly.tools",
-  author: "Eric",
+  url: "https://seriouslyanotherai.vercel.app",
+  author: "sai Krishna",
   keywords: ["tools", "directory", "findly"],
-  email: "contact@findly.tools",
-  x: "https://x.com/ericbn09",
+  email: "maya@untitled1.in",
+  x: "https://x.com/",
   navigation: {
     categories: CATEGORIES,
   },
