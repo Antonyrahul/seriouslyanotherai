@@ -7,7 +7,7 @@ import { useSearchParams,useRouter } from "next/navigation";
 
 import { authClient } from "@/lib/auth-client";
 import { Logo } from "../logo";
-import  { Router } from "@/node_modules/next/router";
+
 
 
 
@@ -46,7 +46,7 @@ export function SignInForm() {
   //     email: "user@example.com", // required
   //     otp: "123456", // required
   // });
-    console.log("email data is",data)
+    console.log("email data is",data,error)
     if (data.success==true)
     {
       setotpsent(true)
@@ -72,7 +72,7 @@ export function SignInForm() {
   //     email: "user@example.com", // required
   //     otp: "123456", // required
   // });
-    console.log("email data is",data)
+    console.log("email data is",data,error)
   
     } catch (error) {
       setError(error instanceof Error ? error.message : "An error occurred");
