@@ -45,7 +45,7 @@ export const auth = betterAuth({
     admin({}),
     nextCookies(),
     emailOTP({ 
-      async sendVerificationOTP({ email, otp, type}:{ email:any, otp:any, type:any}) { 
+      async sendVerificationOTP({ email, otp, type}:{ email:string, otp:string, type:string}) { 
 // Implement the sendVerificationOTP method to send the OTP to the user's email address
 console.log(email,otp,type)
 const transporter =  createTransport(process.env.EMAIL_SERVER);
@@ -353,16 +353,10 @@ function html(params: { otp: string, email: string }) {
   const {  otp, email } = params
 
   //const escapedHost = host.replace(/\./g, "&#8203;.")
+  console.log(email)
 
   const brandColor =  "#346df1"
-  const color = {
-    background: "#f9f9f9",
-    text: "#444",
-    mainBackground: "#fff",
-    buttonBackground: brandColor,
-    buttonBorder: brandColor,
-    buttonText:  "#fff",
-  }
+
 
 //   return `
 // <body style="background: ${color.background};">
