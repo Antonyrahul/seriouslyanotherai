@@ -47,7 +47,7 @@ export function SignInForm() {
   //     otp: "123456", // required
   // });
     console.log("email data is",data,error)
-    if (data.success==true)
+    if (data?.success==true)
     {
       setotpsent(true)
     }
