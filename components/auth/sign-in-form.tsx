@@ -3,27 +3,84 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams,useRouter } from "next/navigation";
 
 import { authClient } from "@/lib/auth-client";
 import { Logo } from "../logo";
+import  { Router } from "@/node_modules/next/router";
+
+
 
 export function SignInForm() {
   const [loadingButtons, setLoadingButtons] = useState({
     google: false,
     github: false,
+    sendemail: false,
+    verifyemail: false
   });
+  const  route= useRouter()
+
   const [error, setError] = useState<string | null>(null);
+
+  const [userEmail,setUserEmail]=useState("")
+
+  const [otpsent,setotpsent]=useState(false)
+
+  const [ontp,setontp]=useState("")
 
   // Check if user came from submit page
   const searchParams = useSearchParams();
   const isFromSubmit = searchParams.get("from") === "submit";
   const isFromAdvertise = searchParams.get("from") === "advertise";
 
-  const handleLogin = async (provider: "google" | "github") => {
+  const handleLogin = async (provider: "google" | "github" | "sendemail" |"verifyemail") => {
     setLoadingButtons((prev) => ({ ...prev, [provider]: true }));
     setError(null);
-
+  if(provider=="sendemail"){
+    try {
+      const { data, error } = await authClient.emailOtp.sendVerificationOtp({
+        email: userEmail, // required
+        type: "sign-in", // required
+    });
+  //   const { data, error } = await authClient.signIn.emailOtp({
+  //     email: "user@example.com", // required
+  //     otp: "123456", // required
+  // });
+    console.log("email data is",data)
+    if (data.success==true)
+    {
+      setotpsent(true)
+    }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "An error occurred");
+    } finally {
+      setLoadingButtons((prev) => ({ ...prev, [provider]: false }));
+    }
+  }
+  else if(provider=="verifyemail"){
+    try {
+      const { data, error } = await authClient.signIn.emailOtp({
+        email: userEmail, // required
+        otp: ontp, // required
+        
+    });
+    if(data.token){
+   
+      route.push("/")
+    }
+  //   const { data, error } = await authClient.signIn.emailOtp({
+  //     email: "user@example.com", // required
+  //     otp: "123456", // required
+  // });
+    console.log("email data is",data)
+  
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "An error occurred");
+    } finally {
+      setLoadingButtons((prev) => ({ ...prev, [provider]: false }));
+    }
+  }
+    else{
     try {
       await authClient.signIn.social({
         provider,
@@ -38,6 +95,8 @@ export function SignInForm() {
     } finally {
       setLoadingButtons((prev) => ({ ...prev, [provider]: false }));
     }
+  }
+
   };
 
   return (
@@ -144,6 +203,74 @@ export function SignInForm() {
                   : "Continue with GitHub"}
               </span>
             </button>
+            {!otpsent?(
+            <div className="text-center mb-4 flex flex-col items-center gap-4 ">
+            <p className="text-gray-600 text-sm">
+            
+                 Or Signing using your email
+           
+            </p>
+           
+            <input
+                  type="email"
+                  placeholder="Enter Email"
+                  value={userEmail}
+                  onChange={(e) =>
+                    setUserEmail(
+                      e.target.value
+                    )
+                  }
+                  className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent h-9"
+                />
+            <button
+              onClick={() => handleLogin("sendemail")}
+              disabled={loadingButtons.sendemail}
+              className="w-full flex items-center justify-center gap-2 px-1 py-1.5 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+   <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M3.75 5.25L3 6V18L3.75 18.75H20.25L21 18V6L20.25 5.25H3.75ZM4.5 7.6955V17.25H19.5V7.69525L11.9999 14.5136L4.5 7.6955ZM18.3099 6.75H5.68986L11.9999 12.4864L18.3099 6.75Z" fill="#080341"/>
+</svg>
+              <span className="font-medium">
+                {loadingButtons.sendemail
+                  ? "Sending OTP"
+                  : "SEND OTP"}
+              </span>
+            </button>
+            </div>):(
+
+<div className="text-center mb-4 flex flex-col items-center gap-4 ">
+<p className="text-gray-600 text-sm">
+
+    Enter your OTP
+
+</p>
+
+<input
+      type="text"
+      placeholder="Enter OTP"
+      value={ontp}
+      onChange={(e) =>
+        setontp(
+          e.target.value
+        )
+      }
+      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent h-9"
+    />
+<button
+  onClick={() => handleLogin("verifyemail")}
+  disabled={loadingButtons.verifyemail}
+  className="w-full flex items-center justify-center gap-2 px-1 py-1.5 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+>
+
+  <span className="font-medium">
+    {loadingButtons.verifyemail
+      ? "Verifying..."
+      : "Verify"}
+  </span>
+</button>
+</div>
+
+            )}
           </div>
 
           {/* Terms and Privacy notice */}

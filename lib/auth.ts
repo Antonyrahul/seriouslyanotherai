@@ -3,15 +3,18 @@ import { nextCookies } from "better-auth/next-js";
 import { admin } from "better-auth/plugins";
 import { stripe } from "@better-auth/stripe";
 import Stripe from "stripe";
+import { emailOTP } from "better-auth/plugins"
 import { db } from "@/db/drizzle";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { processSuccessfulPayment } from "@/app/actions/advertise";
+import { createTransport } from "nodemailer";
 import {
   notifyNewCustomer,
   notifySubscriptionNew,
   notifySubscriptionUpdate,
 } from "@/app/actions/discord-notifications";
 import { getPlanLimit } from "@/lib/constants/config";
+import { constrainedMemory } from "process";
 
 const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-06-30.basil",
@@ -41,6 +44,33 @@ export const auth = betterAuth({
   plugins: [
     admin({}),
     nextCookies(),
+    emailOTP({ 
+      async sendVerificationOTP({ email, otp, type}:{ email:any, otp:any, type:any}) { 
+// Implement the sendVerificationOTP method to send the OTP to the user's email address
+console.log(email,otp,type)
+const transporter =  createTransport(process.env.EMAIL_SERVER);
+    
+   
+          
+         const info = await transporter.sendMail({
+           from: process.env.EMAIL_FROM,
+           to: email,
+           subject: "Your OTP",
+           text: "Your OTP is "+otp, // plain‑text body
+           html: html({otp,email}),
+          //  attachments:[{
+          //   filename:"invoice.pdf",
+          //   path:pdffile,
+          //   //encoding:"base64"
+          // }]
+         })
+         console.log(info)
+// const { data, error } = await authClient.emailOtp.sendVerificationOtp({
+//   email: "user@example.com", // required
+//   type: "sign-in", // required
+// });
+}, 
+}),
     stripe({
       stripeClient,
       stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
@@ -318,3 +348,104 @@ export const auth = betterAuth({
     }),
   ],
 });
+
+function html(params: { otp: string, email: string }) {
+  const {  otp, email } = params
+
+  //const escapedHost = host.replace(/\./g, "&#8203;.")
+
+  const brandColor =  "#346df1"
+  const color = {
+    background: "#f9f9f9",
+    text: "#444",
+    mainBackground: "#fff",
+    buttonBackground: brandColor,
+    buttonBorder: brandColor,
+    buttonText:  "#fff",
+  }
+
+//   return `
+// <body style="background: ${color.background};">
+//   <table width="100%" border="0" cellspacing="20" cellpadding="0"
+//     style="background: ${color.mainBackground}; max-width: 600px; margin: auto; border-radius: 10px;">
+//     <tr>
+//       <td align="center"
+//         style="padding: 10px 0px; font-size: 22px; font-family: Helvetica, Arial, sans-serif; color: ${color.text};">
+//         Sign in to <strong>${escapedHost}</strong>
+//       </td>
+//     </tr>
+//     <tr>
+//       <td align="center" style="padding: 20px 0;">
+//         <table border="0" cellspacing="0" cellpadding="0">
+//           <tr>
+//             <td align="center" style="border-radius: 5px;" bgcolor="${color.buttonBackground}"><a href="${url}"
+//                 target="_blank"
+//                 style="font-size: 18px; font-family: Helvetica, Arial, sans-serif; color: ${color.buttonText}; text-decoration: none; border-radius: 5px; padding: 10px 20px; border: 1px solid ${color.buttonBorder}; display: inline-block; font-weight: bold;">Sign
+//                 in</a></td>
+//           </tr>
+//         </table>
+//       </td>
+//     </tr>
+//     <tr>
+//       <td align="center"
+//         style="padding: 0px 0px 10px 0px; font-size: 16px; line-height: 22px; font-family: Helvetica, Arial, sans-serif; color: ${color.text};">
+//         If you did not request this email you can safely ignore it kindly....
+//       </td>
+//     </tr>
+//   </table>
+// </body>
+// `
+
+
+return  `
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html dir="ltr" lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width" />
+
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <meta
+      name="format-detection"
+      content="telephone=no,address=no,email=no,date=no,url=no" />
+    <meta name="color-scheme" content="light" />
+    <meta name="supported-color-schemes" content="light" />
+    <!--$-->
+    <style>
+      @font-face {
+        font-family: 'Inter';
+        font-style: normal;
+        font-weight: 400;
+        mso-font-alt: 'sans-serif';
+        src: url(https://rsms.me/inter/font-files/Inter-Regular.woff2?v=3.19) format('woff2');
+      }
+
+      * {
+        font-family: 'Inter', sans-serif;
+      }
+    </style>
+    <style>
+      blockquote,h1,h2,h3,img,li,ol,p,ul{margin-top:0;margin-bottom:0}@media only screen and (max-width:425px){.tab-row-full{width:100%!important}.tab-col-full{display:block!important;width:100%!important}.tab-pad{padding:0!important}}
+    </style>
+  </head>
+  <body style="margin:0">
+    <div
+    
+      id="__react-email-preview">
+      Your OTP is ${otp}
+      <div>
+         ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿
+      </div>
+    </div>
+   
+    <!--/$-->
+  </body>
+</html>
+
+
+`
+
+}

@@ -1,6 +1,7 @@
 import { createAuthClient } from "better-auth/react";
 import { adminClient } from "better-auth/client/plugins";
 import { stripeClient } from "@better-auth/stripe/client";
+import { emailOTPClient } from "better-auth/client/plugins"
 
 export const authClient = createAuthClient({
   baseURL:
@@ -12,5 +13,6 @@ export const authClient = createAuthClient({
     stripeClient({
       subscription: true,
     }),
+    emailOTPClient()
   ],
 });
