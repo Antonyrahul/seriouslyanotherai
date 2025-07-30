@@ -355,7 +355,7 @@ function html(params: { otp: string, email: string }) {
   //const escapedHost = host.replace(/\./g, "&#8203;.")
   console.log(email)
 
-  const brandColor =  "#346df1"
+
 
 
 //   return `
