@@ -64,7 +64,7 @@ export function SignInForm() {
         otp: ontp, // required
         
     });
-    if(data.token){
+    if(data?.token){
    
       route.push("/")
     }
